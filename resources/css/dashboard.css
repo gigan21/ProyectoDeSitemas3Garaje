@@ -1,0 +1,33 @@
+/* Estilos generales */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.espacio-card {
+    transition: transform 0.3s;
+}
+
+.espacio-card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-primary {
+    background-color: #3490dc;
+    border-color: #3490dc;
+}
+
+.bg-primary {
+    background-color: #3490dc !important;
+}
+
+/* Responsive tables */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Badges */
+.badge {
+    font-size: 0.9em;
+    padding: 0.5em 0.75em;
+}
