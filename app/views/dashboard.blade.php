@@ -44,7 +44,7 @@
         </div>
         <div class="card-info">
             <h3>Ingresos Hoy</h3>
-            <p>${{ number_format($ingresosHoy, 2) }}</p>
+            <p>Bs {{ number_format($ingresosHoy, 2, '.', ',') }}</p>
         </div>
     </div>
 </div>
@@ -52,6 +52,8 @@
 <!-- Últimas Entradas -->
 <div class="recent-entries">
     <h3>Historial de Ultimas Entradas</h3>
+        
+
     <table class="table">
         <thead>
             <tr>

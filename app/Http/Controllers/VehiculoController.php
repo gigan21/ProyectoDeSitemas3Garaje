@@ -8,11 +8,22 @@ use Illuminate\Http\Request;
 
 class VehiculoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $vehiculos = Vehiculo::with('cliente')->orderBy('id', 'desc')->paginate(10);
-        return view('vehiculos.index', compact('vehiculos'));
+        $buscar = $request->input('buscar');
+
+        $vehiculos = Vehiculo::when($buscar, function($query, $buscar) {
+            return $query->where('placa', 'like', "%{$buscar}%")
+                         ->orWhere('modelo', 'like', "%{$buscar}%");
+            // Eliminamos la línea que buscaba por 'marca'
+        })
+        ->orderBy('id', 'desc')
+        ->paginate(10)
+        ->withQueryString();
+
+        return view('vehiculos.index', compact('vehiculos', 'buscar'));
     }
+
 
     public function create()
     {
@@ -48,6 +59,7 @@ class VehiculoController extends Controller
             'modelo' => 'required|string|max:50',
             'color' => 'required|string|max:30',
             'cliente_id' => 'required|exists:clientes,id'
+            
         ]);
 
         $vehiculo->update($request->all());

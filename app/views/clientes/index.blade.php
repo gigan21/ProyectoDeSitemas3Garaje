@@ -12,26 +12,8 @@
         </a>
     </div>
     <div class="card-body">
-        <!-- Barra de búsqueda -->
-        <div class="mb-4">
-            <form action="{{ route('clientes.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" 
-                           name="search" 
-                           class="form-control" 
-                           placeholder="Buscar por nombre..." 
-                           value="{{ request('search') }}">
-                    <button class="btn btn-outline-primary" type="submit">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                    @if(request('search'))
-                        <a href="{{ route('clientes.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i> Limpiar
-                        </a>
-                    @endif
-                </div>
-            </form>
-        </div>
+        
+    
     <div class="card-body">
         
         <div class="mt-4">

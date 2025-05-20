@@ -11,10 +11,24 @@ use Illuminate\Support\Facades\DB;
 
 class EspacioController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Agregamos Request $request
     {
-        $espacios = Espacio::with('cliente')->orderBy('numero_espacio')->get();
-        return view('espacios.index', compact('espacios'));
+        $buscar = $request->input('buscar');
+
+        $espacios = Espacio::with('cliente')
+            ->when($buscar, function($query, $buscar) {
+                // Búsqueda por número de espacio o por nombre de cliente asignado
+                $query->where('numero_espacio', 'like', "%{$buscar}%")
+                      ->orWhere('estado', 'like', "%{$buscar}%")
+                      ->orWhereHas('cliente', function ($q) use ($buscar) {
+                          $q->where('nombre', 'like', "%{$buscar}%");
+                      });
+            })
+            ->orderBy('numero_espacio')
+            ->paginate(10) // Añadida paginación si no la tenías, para consistencia
+            ->withQueryString();
+
+        return view('espacios.index', compact('espacios', 'buscar')); // Pasamos 'buscar'
     }
  // Formulario de creación
  public function create()

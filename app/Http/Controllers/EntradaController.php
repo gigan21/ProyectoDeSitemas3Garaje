@@ -10,14 +10,26 @@ use Illuminate\Support\Facades\DB;
 
 class EntradaController extends Controller
 {
-    public function index()
+        public function index(Request $request)
     {
-        $entradas = Entrada::with(['vehiculo', 'espacio', 'salida'])
-            ->orderBy('fecha_entrada', 'desc')
-            ->paginate(10);
+        $buscar = $request->input('buscar');
+
+        $entradasQuery = Entrada::with(['vehiculo', 'espacio', 'salida']);
+
+        if ($buscar) {
+            // Ahora busca solo por el número de espacio asociado a la entrada
+            $entradasQuery->whereHas('espacio', function ($q) use ($buscar) {
+                $q->where('numero_espacio', 'like', "%{$buscar}%");
+            });
+        }
+
+        $entradas = $entradasQuery->orderBy('fecha_entrada', 'desc')
+                               ->paginate(10)
+                               ->withQueryString();
             
-        return view('entradas.index', compact('entradas'));
+        return view('entradas.index', compact('entradas', 'buscar'));
     }
+
 
     public function create()
     {
@@ -60,4 +72,10 @@ class EntradaController extends Controller
                 ->with('error', 'Error al registrar entrada: ' . $e->getMessage());
         }
     }
+    public function getFechaEntradaFormateadaAttribute()
+{
+    return $this->fecha_entrada instanceof \Carbon\Carbon 
+        ? $this->fecha_entrada->format('d/m/Y H:i')
+        : \Carbon\Carbon::parse($this->fecha_entrada)->format('d/m/Y H:i');
+}
 }

@@ -26,7 +26,7 @@
                 <tr>
                     <td>{{ $pago->fecha_pago->format('d/m/Y') }}</td>
                     <td>{{ $pago->cliente->nombre }}</td>
-                    <td>${{ number_format($pago->monto, 2) }}</td>
+                    <td>Bs {{ number_format($pago->monto, 2) }}</td>
                     <td>
                         <form action="{{ route('pagos.destroy', $pago->id) }}" method="POST" style="display:inline;">
                             @csrf
