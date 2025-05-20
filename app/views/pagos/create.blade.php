@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="monto">Monto ($)</label>
+                        <label for="monto">Monto (Bs)</label>
                         <input type="number" step="0.01" name="monto" id="monto" 
                                class="form-control" required>
                     </div>
