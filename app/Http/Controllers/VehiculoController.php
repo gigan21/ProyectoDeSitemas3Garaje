@@ -27,7 +27,7 @@ class VehiculoController extends Controller
 
     public function create()
     {
-        $clientes = Cliente::all();
+        $clientes = Cliente::orderBy('id', 'desc')->get();
         return view('vehiculos.create', compact('clientes'));
     }
 

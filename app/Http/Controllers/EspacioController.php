@@ -11,25 +11,26 @@ use Illuminate\Support\Facades\DB;
 
 class EspacioController extends Controller
 {
-    public function index(Request $request) // Agregamos Request $request
-    {
-        $buscar = $request->input('buscar');
+   public function index(Request $request)
+{
+    $buscar = $request->input('buscar');
 
-        $espacios = Espacio::with('cliente')
-            ->when($buscar, function($query, $buscar) {
-                // Búsqueda por número de espacio o por nombre de cliente asignado
-                $query->where('numero_espacio', 'like', "%{$buscar}%")
-                      ->orWhere('estado', 'like', "%{$buscar}%")
-                      ->orWhereHas('cliente', function ($q) use ($buscar) {
-                          $q->where('nombre', 'like', "%{$buscar}%");
-                      });
-            })
-            ->orderBy('numero_espacio')
-            ->paginate(10) // Añadida paginación si no la tenías, para consistencia
-            ->withQueryString();
+    $espacios = Espacio::with('cliente')
+        ->when($buscar, function($query, $buscar) {
+            $query->where('numero_espacio', 'like', "%{$buscar}%")
+                  ->orWhere('estado', 'like', "%{$buscar}%")
+                  ->orWhereHas('cliente', function ($q) use ($buscar) {
+                      $q->where('nombre', 'like', "%{$buscar}%");
+                  });
+        })
+        ->orderBy('created_at', 'asc')
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('espacios.index', compact('espacios', 'buscar')); // Pasamos 'buscar'
-    }
+    return view('espacios.index', compact('espacios', 'buscar'));
+}
+
+   
  // Formulario de creación
  public function create()
  {
@@ -42,7 +43,13 @@ class EspacioController extends Controller
      $request->validate([
          'numero_espacio' => 'required|unique:espacios,numero_espacio|max:10',
          'estado' => 'required|in:libre,ocupado,mantenimiento',
-     ]);
+
+     ], [
+         'numero_espacio.unique' => 'Ya existe un espacio con ese número. Por favor, elige otro.',
+         'numero_espacio.required' => 'El número de espacio es obligatorio.',
+         
+     ]
+    );
 
      Espacio::create($request->only('numero_espacio', 'estado'));
 
@@ -95,29 +102,41 @@ class EspacioController extends Controller
         return redirect()->route('espacios.index')->with('success', 'Asignación actualizada');
     }
     public function liberar(Espacio $espacio)
-    {
-        // Buscar la entrada activa para este espacio
+{
+    try {
+        DB::beginTransaction();
+
+        // Buscar la entrada activa
         $entrada = Entrada::where('espacio_id', $espacio->id)
             ->whereDoesntHave('salida')
             ->first();
-    
+
         if ($entrada) {
-            // Registrar la salida
+            // Registrar salida con total_pagado = 0 para mensuales
             Salida::create([
                 'entrada_id' => $entrada->id,
                 'fecha_salida' => now(),
-                'total_pagado' => 0 // O el cálculo que corresponda
+                'total_pagado' => 0,
+                 // Agrega este campo si existe
             ]);
         }
-    
-        // Actualizar el espacio
+
+        // Liberar el espacio
         $espacio->update([
             'cliente_id' => null,
             'estado' => 'libre'
         ]);
-    
+
+        DB::commit();
+
         return redirect()->route('espacios.index')
             ->with('success', 'Espacio liberado exitosamente');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error("Error al liberar espacio: " . $e->getMessage());
+        return back()->with('error', 'Error al liberar el espacio');
     }
+}
     
 }

@@ -38,6 +38,18 @@ class EntradaController extends Controller
         
         return view('entradas.create', compact('vehiculos', 'espacios'));
     }
+public function destroy(Entrada $entrada)
+{
+    // Verificar si la entrada tiene una salida registrada
+    if ($entrada->salida) {
+        return redirect()->route('entradas.index')->with('error', 'No se puede eliminar la entrada porque ya tiene una salida registrada.');
+    }
+
+    // Eliminar la entrada
+    $entrada->delete();
+
+    return redirect()->route('entradas.index')->with('success', 'Entrada eliminada correctamente.');
+}
 
     public function store(Request $request)
     {

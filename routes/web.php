@@ -11,12 +11,28 @@ use App\Http\Controllers\SalidaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReporteController;
 
-Route::redirect('/', '/dashboard');
+// RUTA RAÍZ - Redirige según el estado de autenticación
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect('/dashboard');
+    }
+    return redirect('/login');
+});
 
 // LOGIN y LOGOUT
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('guest');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])
+    ->name('register')
+    ->middleware('guest');
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('guest');
+Route::get('/login', [AuthController::class, 'showLoginForm'])
+    ->name('login')
+    ->middleware('guest');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('guest');
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout')
+    ->middleware('auth');
 
 // RUTAS PROTEGIDAS
 Route::middleware('auth')->group(function () {
@@ -24,6 +40,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('clientes', ClienteController::class);
     Route::resource('vehiculos', VehiculoController::class);
     Route::resource('entradas', EntradaController::class);
+
+    // Definir las rutas personalizadas ANTES del resource
+    Route::get('salidas/mensual/create', [SalidaController::class, 'createMensual'])->name('salidas.create-mensual');
+    Route::get('salidas/{salida}/pagar', [SalidaController::class, 'pagar'])->name('salidas.pagar');
+    Route::post('salidas/{salida}/procesar-pago', [SalidaController::class, 'procesarPago'])->name('salidas.procesar-pago');
     Route::resource('salidas', SalidaController::class);
     Route::resource('pagos', PagoController::class);
 
@@ -41,4 +62,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::post('/reportes/generar', [ReporteController::class, 'generar'])->name('reportes.generar');
+    Route::post('/reportes/espacios', [ReporteController::class, 'generarReporteEspacios'])->name('reportes.espacios');
+
 });

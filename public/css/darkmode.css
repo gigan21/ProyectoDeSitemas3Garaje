@@ -1,0 +1,100 @@
+/* darkmode.css */
+.dark-mode {
+    background-color: #121212 !important;
+}
+
+.dark-mode .main-content {
+    background-color: #121212;
+}
+
+/* Mantener elementos de contenido claros */
+.dark-mode .card,
+.dark-mode .card-table,
+.dark-mode .chart-container,
+.dark-mode .table-responsive,
+.dark-mode .recent-entries,
+.dark-mode .table {
+    background-color: white !important;
+    color: #333 !important;
+}
+
+.dark-mode .table th {
+    background: #f8f9fa !important;
+    color: #333 !important;
+}
+
+.dark-mode .table td {
+    border-bottom-color: #dee2e6 !important;
+}
+
+.dark-mode .table tr:hover td {
+    background-color: #f8f9fa !important;
+}
+
+.dark-mode .card-header {
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Estilos del botón toggle */
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.toggle-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.toggle-btn .fa-sun {
+    display: none;
+}
+
+.dark-mode .toggle-btn .fa-moon {
+    display: none;
+}
+
+.dark-mode .toggle-btn .fa-sun {
+    display: block;
+}
+/* Cambiar color de texto en el nav-left cuando está en modo oscuro */
+.dark-mode .nav-left h1 {
+    color: white !important;
+}
+
+/* Opcional: si también quieres cambiar otros textos en la barra de navegación */
+.dark-mode .top-nav {
+    color: white;
+}
+
+.dark-mode .nav-right .user-profile strong {
+    color: white !important;
+}
+
+.dark-mode .search-box input {
+    background-color: #333 !important;
+    color: white !important;
+    border-color: #555 !important;
+}
+
+.dark-mode .clear-button {
+    color: #aaa !important;
+}

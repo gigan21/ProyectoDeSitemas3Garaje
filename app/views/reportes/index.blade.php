@@ -50,4 +50,16 @@
         </div>
     </div>
 </div>
+<form action="{{ route('reportes.espacios') }}" method="POST" target="_blank">
+    @csrf
+    <div class="form-group">
+        <label for="fecha_inicio">Fecha Inicio</label>
+        <input type="date" name="fecha_inicio" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="fecha_fin">Fecha Fin</label>
+        <input type="date" name="fecha_fin" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Generar Reporte de Espacios</button>
+</form>
 @endsection
