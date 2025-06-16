@@ -10,10 +10,9 @@ class PagoController extends Controller
 {
     public function index()
     {
-        $pagos = PagoMensual::from('pagos_mensuales')
-            ->with('cliente')
-            ->orderBy('fecha_pago', 'desc')
-            ->paginate(10);
+        $pagos = PagoMensual::with('cliente')
+    ->orderBy('fecha_pago', 'desc')
+    ->paginate(10);
             
         return view('pagos.index', compact('pagos'));
     }

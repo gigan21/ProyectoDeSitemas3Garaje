@@ -6,7 +6,7 @@
 @section('content')
 <div class="card shadow">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Historial de Entradas</h4>
+        <h4 class="mb-0">Entradas</h4>
         <a href="{{ route('entradas.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Nueva Entrada
         </a>
@@ -23,6 +23,7 @@
                         <th>Espacio</th>
                         <th>Hora Entrada</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,6 +46,15 @@
                             @else
                                 <span class="badge bg-success">En parqueo</span>
                             @endif
+                        </td>
+                          <td>
+                            <form action="{{ route('entradas.destroy', $entrada->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar esta entrada?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach

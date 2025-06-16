@@ -15,7 +15,7 @@ class Espacio extends Model
         'cliente_id'
     ];
 
-    // Relación con Cliente (ahora genérica)
+    // Relación con Cliente 
 public function cliente()
 {
     return $this->belongsTo(Cliente::class, 'cliente_id');
@@ -36,6 +36,17 @@ public function entradaActiva()
 
 public function estaOcupado()
 {
-    return $this->estado === 'ocupado' && $this->entradaActiva();
+    return $this->estado === 'ocupado' && $this->entradaActiva()!== null;
 }
+ // Helper para mostrar el estado en texto
+    public function estadoTexto()
+    {
+        if ($this->estado === 'ocupado') {
+            return $this->estaOcupado() ? 'Ocupado' : 'Libre';
+        }
+        if ($this->estado === 'mantenimiento') {
+            return 'Mantenimiento';
+        }
+        return 'Libre';
+    }
 }

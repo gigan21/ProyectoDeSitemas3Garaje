@@ -12,7 +12,19 @@
                 @csrf
                 <div class="mb-3">
                     <label for="numero_espacio" class="form-label">Número de Espacio</label>
-                    <input type="text" class="form-control" id="numero_espacio" name="numero_espacio" required>
+                    <input type="text" 
+                           class="form-control @error('numero_espacio') is-invalid @enderror" 
+                           id="numero_espacio" 
+                           name="numero_espacio" 
+                           value="{{ old('numero_espacio') }}" 
+                           required>
+                    
+                    {{-- Mostrar error si el número de espacio está duplicado o tiene otro problema --}}
+                    @error('numero_espacio')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label for="estado" class="form-label">Estado</label>
