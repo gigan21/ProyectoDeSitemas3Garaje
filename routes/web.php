@@ -64,4 +64,4 @@ Route::middleware('auth')->group(function () {
     Route::post('/reportes/generar', [ReporteController::class, 'generar'])->name('reportes.generar');
     Route::post('/reportes/espacios', [ReporteController::class, 'generarReporteEspacios'])->name('reportes.espacios');
 
-});
+});// Ruta simulada para septiembre
