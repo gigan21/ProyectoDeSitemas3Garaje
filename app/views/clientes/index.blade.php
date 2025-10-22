@@ -12,8 +12,13 @@
         </a>
     </div>
     <div class="card-body">
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         <div class="mt-4">
-            {{-- NEW DIV FOR SCROLLING --}}
             <div class="table-scroll-container">
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -56,8 +61,8 @@
                         </tbody>
                     </table>
                 </div>
-            </div> {{-- END table-scroll-container --}}
-            {{ $clientes->links() }}
+            </div>
+            
         </div>
     </div>
 </div>
@@ -142,6 +147,33 @@
         .table-scroll-container {
             max-height: 300px; /* Una altura menor para pantallas pequeñas */
         }
+    }
+   /* Imagen de fondo que cubre todo el wrapper */
+   .main-content.wrapper {
+        position: relative;
+        min-height: 100vh;
+    }
+
+    .main-content.wrapper::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('{{ asset('images/clientss.png') }}');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 1;
+        z-index: 0;
+        pointer-events: none;
+        filter: invert(0) !important;
+    }
+
+    .main-content.wrapper > * {
+        position: relative;
+        z-index: 1;
     }
 </style>
 @endpush

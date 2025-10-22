@@ -14,12 +14,14 @@ class Salida extends Model
         'entrada_id',
         'fecha_salida',
         'total_pagado',
+        'es_gratis',
         
     ];
 
     protected $casts = [
         'fecha_salida' => 'datetime',
-        'total_pagado' => 'decimal:2'
+        'total_pagado' => 'decimal:2',
+        'es_gratis' => 'boolean'
     ];
 
     // Relación con Entrada

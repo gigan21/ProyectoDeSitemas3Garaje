@@ -1,7 +1,7 @@
 <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
     <!-- Imagen del auto según el estado -->
     <div class="car-image">
-        <img src="{{ $espacio->estado == 'ocupado' ? asset('images/car-red.png') : 
+        <img src="{{ $espacio->estado == 'ocupado' ? asset('images/card-red.jpeg') : 
                     ($espacio->estado == 'mantenimiento' ? asset('images/coche.png') : 
                     asset('images/coche2.png')) }}" 
              alt="Espacio {{ $espacio->numero_espacio }}"
@@ -24,6 +24,14 @@
                     <i class="fas fa-door-open"></i>
                 </button>
             </form>
+            @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
+                <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-success" title="Gratis (ticket ≥100 Bs)">
+                        <i class="fas fa-badge-dollar"></i> Gratis
+                    </button>
+                </form>
+            @endif
         @elseif($espacio->estado == 'libre')
             <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
                 <i class="fas fa-user-plus"></i>

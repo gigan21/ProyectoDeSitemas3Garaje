@@ -27,4 +27,12 @@ class Vehiculo extends Model
     {
         return $this->hasMany(Entrada::class);
     }
+
+    // Verifica si el vehículo está actualmente dentro (entrada sin salida)
+    public function tieneEntradaActiva(): bool
+    {
+        return $this->entradas()
+            ->whereDoesntHave('salida')
+            ->exists();
+    }
 }

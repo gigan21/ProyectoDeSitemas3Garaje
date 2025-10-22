@@ -24,8 +24,7 @@ class EntradaController extends Controller
         }
 
         $entradas = $entradasQuery->orderBy('fecha_entrada', 'desc')
-                               ->paginate(10)
-                               ->withQueryString();
+            ->get(); // Cambia paginate(10) por get()
             
         return view('entradas.index', compact('entradas', 'buscar'));
     }
@@ -40,15 +39,27 @@ class EntradaController extends Controller
     }
 public function destroy(Entrada $entrada)
 {
-    // Verificar si la entrada tiene una salida registrada
-    if ($entrada->salida) {
-        return redirect()->route('entradas.index')->with('error', 'No se puede eliminar la entrada porque ya tiene una salida registrada.');
+    // 1. Verificar si la entrada NO tiene una salida registrada (está "En parqueo")
+    if (!$entrada->salida) {
+        // Si NO hay salida registrada, el vehículo está actualmente en el estacionamiento.
+        // Se impide la eliminación para mantener la integridad de los datos.
+        return redirect()->route('entradas.index')->with('error', 'No se puede eliminar la entrada porque el vehículo aún se encuentra **En parqueo** (no tiene salida registrada).');
     }
 
-    // Eliminar la entrada
+    // 2. Si tiene una salida registrada ($entrada->salida es true), significa que la visita ha terminado.
+    // En este caso, la eliminación de la entrada es potencialmente segura (aunque a menudo no es una buena práctica).
+
+    // **IMPORTANTE**: Antes de eliminar, debes liberar el espacio de parqueo
+    // que fue ocupado por esta entrada.
+    if ($entrada->espacio) {
+        $entrada->espacio->update(['estado' => 'libre']);
+    }
+
+    // 3. Eliminar la entrada (y la salida asociada si es una relación 'hasOne' con 'onDelete' cascade)
     $entrada->delete();
 
-    return redirect()->route('entradas.index')->with('success', 'Entrada eliminada correctamente.');
+    // 4. Redireccionar con mensaje de éxito
+    return redirect()->route('entradas.index')->with('success', 'Entrada y sus registros relacionados eliminados correctamente.');
 }
 
     public function store(Request $request)

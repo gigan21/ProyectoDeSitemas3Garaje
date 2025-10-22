@@ -16,7 +16,7 @@ class SalidaController extends Controller
     {
         $salidas = Salida::with('entrada.vehiculo')
             ->orderBy('fecha_salida', 'desc')
-            ->paginate(10);
+            ->get(); // Cambia paginate(10) por get()
             
         return view('salidas.index', compact('salidas'));
     }
@@ -40,21 +40,34 @@ class SalidaController extends Controller
             'total_pagado' => 'required|numeric|min:0'
         ]);
 
-        // Obtener la entrada relacionada
-        $entrada = Entrada::find($request->entrada_id);
-        
-        // Liberar el espacio
-        $entrada->espacio->update(['estado' => 'libre']);
+        DB::beginTransaction();
+        try {
+            // Obtener la entrada relacionada con todas las relaciones necesarias
+            $entrada = Entrada::with(['vehiculo.cliente', 'espacio'])->find($request->entrada_id);
+            
+            // Liberar el espacio
+            $entrada->espacio->update(['estado' => 'libre']);
 
-        // Registrar la salida
-        Salida::create([
-            'entrada_id' => $request->entrada_id,
-            'fecha_salida' => now(),
-            'total_pagado' => $request->total_pagado
-        ]);
+            // Registrar la salida
+            $salida = Salida::create([
+                'entrada_id' => $request->entrada_id,
+                'fecha_salida' => now(),
+                'total_pagado' => $request->total_pagado
+            ]);
 
-        return redirect()->route('salidas.index')
-            ->with('success', 'Salida registrada exitosamente');
+            // NO eliminar automáticamente los registros de salidas
+            // Los registros de salidas permanecerán hasta limpieza manual
+
+            DB::commit();
+
+            return redirect()->route('salidas.index')
+                ->with('success', 'Salida registrada exitosamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al registrar salida: ' . $e->getMessage());
+            return back()->with('error', 'No se pudo registrar la salida: ' . $e->getMessage());
+        }
     }
     public function getFechaSalidaFormateadaAttribute()
 {
@@ -120,5 +133,34 @@ public function createMensual()
         ->get();
         
     return view('salidas.create-mensual', compact('entradas'));
+}
+
+/**
+ * Limpiar registros de cliente ocasional después de salida
+ */
+private function limpiarClienteOcasional($cliente)
+{
+    try {
+        // Verificar que todos los vehículos del cliente tengan salida registrada
+        $todosConSalida = $cliente->vehiculos->every(function ($vehiculo) {
+            return $vehiculo->entradas->every(function ($entrada) {
+                return $entrada->salida !== null;
+            });
+        });
+
+        if ($todosConSalida) {
+            // Eliminar vehículos del cliente
+            foreach ($cliente->vehiculos as $vehiculo) {
+                $vehiculo->delete();
+            }
+
+            // Eliminar el cliente
+            $cliente->delete();
+            
+            Log::info("Cliente ocasional '{$cliente->nombre}' eliminado automáticamente después de salida.");
+        }
+    } catch (\Exception $e) {
+        Log::error('Error al limpiar cliente ocasional: ' . $e->getMessage());
+    }
 }
 }

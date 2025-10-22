@@ -1,34 +1,78 @@
-/* ===== PALETA DE COLORES TEMÁTICA PARA GARAJE ===== */
+/* ===== PALETA DE COLORES CYBERPUNK ELEGANTE ===== */
 :root {
-  --primary: #3a5fcd; /* Azul mecánico */
-  --primary-dark: #2a4bac;
-  --secondary: #e63946; /* Rojo automotriz */
-  --accent: #ff9500; /* Naranja herramientas */
-  --dark: #1e293b;
-  --light: #f8fafc;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --gray: #64748b;
+  /* Colores principales cyberpunk */
+  --primary: #00d4ff; /* Cian neón brillante */
+  --primary-dark: #0099cc;
+  --primary-glow: rgba(0, 212, 255, 0.3);
+  --secondary: #ff006e; /* Rosa neón */
+  --secondary-glow: rgba(255, 0, 110, 0.3);
+  --accent: #ffbe0b; /* Amarillo neón */
+  --accent-glow: rgba(255, 190, 11, 0.3);
+  
+  /* Colores de fondo */
+  --dark: #0a0a0a; /* Negro profundo */
+  --dark-secondary: #1a1a2e; /* Azul muy oscuro */
+  --dark-tertiary: #16213e; /* Azul oscuro */
+  --light: #ffffff;
+  --light-secondary: #f0f0f0;
+  
+  /* Colores de estado */
+  --success: #00ff88; /* Verde neón */
+  --success-glow: rgba(0, 255, 136, 0.3);
+  --warning: #ff6b35; /* Naranja neón */
+  --warning-glow: rgba(255, 107, 53, 0.3);
+  --danger: #ff073a; /* Rojo neón */
+  --danger-glow: rgba(255, 7, 58, 0.3);
+  
+  /* Grises cyberpunk */
+  --gray: #4a5568;
   --gray-light: #e2e8f0;
+  --gray-dark: #2d3748;
+  
+  /* Efectos de neón */
+  --neon-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  --neon-glow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
 }
 
-/* ===== ESTILOS GENERALES CON TRANSICIONES ===== */
+/* ===== ESTILOS GENERALES  ===== */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Orbitron', 'Exo 2', 'Rajdhani', 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f1f5f9;
-  color: var(--dark);
+  background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 50%, var(--dark-tertiary) 100%);
+  color: var(--light);
   line-height: 1.6;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Efecto de partículas de fondo */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, var(--primary-glow) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--secondary-glow) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, var(--accent-glow) 0%, transparent 50%);
+  z-index: -1;
+  animation: backgroundPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundPulse {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
 }
 
 /* Estructura principal */
 html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden; /* Evita doble scroll */
+    overflow: hidden;
 }
 
 .dashboard-container {
@@ -36,6 +80,7 @@ html, body {
     height: 100vh;
     width: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 .main-content-wrapper {
@@ -45,13 +90,36 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  background: linear-gradient(135deg, rgba(10, 10, 10, 0.8) 0%, rgba(26, 26, 46, 0.9) 100%);
+  backdrop-filter: blur(10px);
 }
 
 .main-content {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
-    background-color: #f5f7fa;
+    background: transparent;
+    position: relative;
+}
+
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, transparent 49%, rgba(0, 212, 255, 0.03) 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 49%, rgba(255, 0, 110, 0.03) 50%, transparent 51%);
+  background-size: 20px 20px;
+  z-index: -1;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(20px, 20px); }
 }
 
 /* Ajustes para el contenido */
@@ -59,6 +127,8 @@ html, body {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 /* Asegurar que los gráficos sean responsivos */
@@ -67,13 +137,18 @@ html, body {
     height: auto !important;
 }
 
-/* ===== SIDEBAR MEJORADO ===== */
+/* ===== SIDEBAR CYBERPUNK ELEGANTE ===== */
 .sidebar {
   width: 280px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(180deg, 
+    rgba(10, 10, 10, 0.95) 0%, 
+    rgba(26, 26, 46, 0.98) 50%, 
+    rgba(22, 33, 62, 0.95) 100%);
   color: var(--light);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    4px 0 20px rgba(0, 0, 0, 0.3),
+    inset -1px 0 0 rgba(0, 212, 255, 0.1);
   z-index: 100;
   position: fixed;
   top: 0;
@@ -81,13 +156,41 @@ html, body {
   height: 100vh;
   overflow-y: auto;
   transform: translateX(0);
+  backdrop-filter: blur(15px);
+  border-right: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, transparent 0%, rgba(0, 212, 255, 0.05) 50%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, rgba(255, 0, 110, 0.03) 50%, transparent 100%);
+  z-index: -1;
 }
 
 .sidebar-header {
   padding: 24px;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
   transition: all 0.3s ease;
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+}
+
+.sidebar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 49%, rgba(0, 212, 255, 0.1) 50%, transparent 51%);
+  z-index: -1;
 }
 
 .sidebar-header img {
@@ -96,13 +199,14 @@ html, body {
   max-width: 100%;
   display: block;
   margin: 0 auto 15px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.3));
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
 }
 
 .sidebar-header:hover img {
   transform: scale(1.05) rotate(-2deg);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.6));
 }
 
 .sidebar-nav ul {
@@ -114,9 +218,25 @@ html, body {
 .sidebar-nav li {
   padding: 0;
   margin: 5px 15px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid transparent;
+}
+
+.sidebar-nav li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 0%, rgba(0, 212, 255, 0.1) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .sidebar-nav li a {
@@ -126,8 +246,10 @@ html, body {
   align-items: center;
   padding: 14px 20px;
   font-weight: 500;
-  border-left: 4px solid transparent;
+  border-left: 3px solid transparent;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar-nav li a i {
@@ -137,48 +259,63 @@ html, body {
   font-size: 1.2em;
   color: var(--accent);
   transition: all 0.2s ease;
+  text-shadow: 0 0 5px currentColor;
 }
 
 .sidebar-nav li:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(255, 0, 110, 0.05) 100%);
   transform: translateX(5px);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.sidebar-nav li:hover::before {
+  opacity: 1;
 }
 
 .sidebar-nav li:hover a {
   color: white;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .sidebar-nav li:hover a i {
-  color: white;
+  color: var(--primary);
   transform: scale(1.1);
+  text-shadow: 0 0 10px currentColor;
 }
 
 .sidebar-nav li.active {
-  background: linear-gradient(90deg, rgba(58, 95, 205, 0.2) 0%, rgba(58, 95, 205, 0.1) 100%);
-  box-shadow: inset 4px 0 0 var(--primary);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(255, 0, 110, 0.1) 100%);
+  border-color: var(--primary);
+  box-shadow: 
+    0 0 20px rgba(0, 212, 255, 0.3),
+    inset 3px 0 0 var(--primary);
 }
 
 .sidebar-nav li.active a {
   color: white;
   font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
 .sidebar-nav li.active a i {
-  color: white;
+  color: var(--primary);
+  text-shadow: 0 0 15px currentColor;
 }
 
 .sidebar-footer {
   padding: 20px;
   position: sticky;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0) 0%, #1e293b 20%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0) 0%, rgba(26, 26, 46, 0.9) 20%);
+  border-top: 1px solid rgba(0, 212, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .sidebar-footer button {
-  background: rgba(255, 149, 0, 0.1);
-  border: 1px solid rgba(255, 149, 0, 0.3);
-  color: var(--accent);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(255, 190, 11, 0.1) 100%);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -187,15 +324,36 @@ html, body {
   padding: 12px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-footer button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transition: left 0.5s ease;
 }
 
 .sidebar-footer button:hover {
-  background: rgba(255, 149, 0, 0.2);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(255, 190, 11, 0.2) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.2);
-  border-color: var(--accent);
+  box-shadow: 
+    0 4px 20px rgba(0, 212, 255, 0.3),
+    0 0 30px rgba(0, 212, 255, 0.2);
+  border-color: var(--primary);
+  color: white;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.sidebar-footer button:hover::before {
+  left: 100%;
 }
 
 
@@ -238,7 +396,7 @@ html, body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   border-radius: 10px;
   overflow: hidden;
-  background-color: white;
+  background-color: rgb(228, 221, 221);
   transition: all 0.3s ease;
   width: 100%;
 }
@@ -289,7 +447,7 @@ html, body {
 
 .search-box .clear-button {
   padding: 13px 18px;
-  background: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, var(--danger) 0%, #e71111 100%);
   color: white;
   border: none;
   cursor: pointer;
@@ -358,7 +516,7 @@ html, body {
 }
 
 .card {
-  background: white;
+  background: rgb(247, 250, 250);
   border-radius: 15px;
   padding: 25px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);

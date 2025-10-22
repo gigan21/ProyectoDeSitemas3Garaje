@@ -4,110 +4,35 @@
 @section('page-title', 'Ocupación de Estacionamiento')
 
 @section('content')
-
-
-<div class="card shadow">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4>Estado Actual del Estacionamiento</h4>
-        <a href="{{ route('espacios.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nuevo Espacio
-        </a>
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="card-body">
-        <!-- Distribución del estacionamiento en cuadrado -->
-        <div class="parking-layout">
-            <!-- Fila superior (cajones 1-8) -->
-            <div class="parking-top-row">
-                @foreach($espacios->where('numero_espacio', '<=', 8) as $espacio)
-                    <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
-                        <div class="space-number">{{ $espacio->numero_espacio }}</div>
-                        <div class="vehicle-info">
-                            {{ $espacio->estadoTexto() }}
-                        </div>
-                        <div class="space-actions">
-                            @if($espacio->estado == 'ocupado')
-                                <form action="{{ route('espacios.liberar', $espacio->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Liberar">
-                                        <i class="fas fa-door-open"></i>
-                                    </button>
-                                </form>
-                            @elseif($espacio->estado == 'libre')
-                                <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
-                                    <i class="fas fa-user-plus"></i>
-                                </a>
-                            @endif
-                            <a href="{{ route('espacios.edit', $espacio->id) }}" class="btn btn-sm btn-warning" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('espacios.destroy', $espacio->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar este espacio?')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
+@endif
 
-            <!-- Filas laterales y área central -->
-            <div class="parking-middle-section">
-                <!-- Columna izquierda (cajones 9-12) -->
-                <div class="parking-left-column">
-                    @foreach($espacios->whereBetween('numero_espacio', [9, 12]) as $espacio)
-                        <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
-                            <div class="space-number">{{ $espacio->numero_espacio }}</div>
-                            @if($espacio->estado == 'ocupado' && $espacio->cliente)
-                                <div class="vehicle-info">
-                                    {{ $espacio->estadoTexto() }}
-                                </div>
-                            @endif
-                            <div class="space-actions">
-                                @if($espacio->estado == 'ocupado')
-                                    <form action="{{ route('espacios.liberar', $espacio->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Liberar">
-                                            <i class="fas fa-door-open"></i>
-                                        </button>
-                                    </form>
-                                @elseif($espacio->estado == 'libre')
-                                    <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
-                                        <i class="fas fa-user-plus"></i>
-                                    </a>
-                                @endif
-                                <a href="{{ route('espacios.edit', $espacio->id) }}" class="btn btn-sm btn-warning" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('espacios.destroy', $espacio->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar este espacio?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 
-                <!-- Área central (entrada/salida) -->
-                <div class="parking-center">
-                    <div class="parking-entrance">
-                        
-                        <i class="fas fa-car fa-3x text-secondary"></i>
-                        <div class="entrance-text">ÁREA DE<br>CIRCULACIÓN</div>
-                        <div class="arrows">
-                            <i class="fas fa-arrow-up text-success"></i>
-                            <i class="fas fa-arrow-down text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna derecha (cajones 13-16) -->
-                <div class="parking-right-column">
-                    @foreach($espacios->whereBetween('numero_espacio', [13, 16]) as $espacio)
+<!-- Contenedor principal con imagen de fondo -->
+<div class="espacios-background">
+    <div class="card shadow espacios-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Estado Actual del Estacionamiento</h4>
+            <a href="{{ route('espacios.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Espacio
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Distribución del estacionamiento en cuadrado -->
+            <div class="parking-layout">
+                <!-- Fila superior (cajones 1-8) -->
+                <div class="parking-top-row">
+                    @foreach($espacios->where('numero_espacio', '<=', 8) as $espacio)
                         <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
                             <div class="space-number">{{ $espacio->numero_espacio }}</div>
                             <div class="vehicle-info">
@@ -121,6 +46,14 @@
                                             <i class="fas fa-door-open"></i>
                                         </button>
                                     </form>
+                                    @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
+                                        <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="Gratis">
+                                                <i class="fas fa-gift"></i> Gratis
+                                            </button>
+                                        </form>
+                                    @endif
                                 @elseif($espacio->estado == 'libre')
                                     <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
                                         <i class="fas fa-user-plus"></i>
@@ -140,15 +73,120 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
 
-            <!-- Fila inferior (cajones 17 en adelante) -->
-            <div class="parking-bottom-row">
-                @foreach($espacios->where('numero_espacio', '>=', 17) as $espacio)
-                    <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
-                         <!-- Imagen del auto según el estado -->
+                <!-- Filas laterales y área central -->
+                <div class="parking-middle-section">
+                    <!-- Columna izquierda (cajones 9-12) -->
+                    <div class="parking-left-column">
+                        @foreach($espacios->whereBetween('numero_espacio', [9, 12]) as $espacio)
+                            <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
+                                <div class="space-number">{{ $espacio->numero_espacio }}</div>
+                                @if($espacio->estado == 'ocupado' && $espacio->cliente)
+                                    <div class="vehicle-info">
+                                        {{ $espacio->estadoTexto() }}
+                                    </div>
+                                @endif
+                                <div class="space-actions">
+                                    @if($espacio->estado == 'ocupado')
+                                        <form action="{{ route('espacios.liberar', $espacio->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Liberar">
+                                                <i class="fas fa-door-open"></i>
+                                            </button>
+                                        </form>
+                                        @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
+                                            <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" title="Gratis">
+                                                    <i class="fas fa-gift"></i> Gratis
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @elseif($espacio->estado == 'libre')
+                                        <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
+                                            <i class="fas fa-user-plus"></i>
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('espacios.edit', $espacio->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('espacios.destroy', $espacio->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar este espacio?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Área central (entrada/salida) -->
+                    <div class="parking-center">
+                        <div class="parking-entrance">
+                            
+                            <i class="fas fa-car fa-3x text-secondary"></i>
+                            <div class="entrance-text">ÁREA DE<br>CIRCULACIÓN</div>
+                            <div class="arrows">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                <i class="fas fa-arrow-down text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna derecha (cajones 13-16) -->
+                    <div class="parking-right-column">
+                        @foreach($espacios->whereBetween('numero_espacio', [13, 16]) as $espacio)
+                            <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
+                                <div class="space-number">{{ $espacio->numero_espacio }}</div>
+                                <div class="vehicle-info">
+                                    {{ $espacio->estadoTexto() }}
+                                </div>
+                                <div class="space-actions">
+                                    @if($espacio->estado == 'ocupado')
+                                        <form action="{{ route('espacios.liberar', $espacio->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Liberar">
+                                                <i class="fas fa-door-open"></i>
+                                            </button>
+                                        </form>
+                                        @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
+                                            <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" title="Gratis">
+                                                    <i class="fas fa-gift"></i> Gratis
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @elseif($espacio->estado == 'libre')
+                                        <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
+                                            <i class="fas fa-user-plus"></i>
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('espacios.edit', $espacio->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('espacios.destroy', $espacio->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar este espacio?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Fila inferior (cajones 17 en adelante) -->
+                <div class="parking-bottom-row">
+                    @foreach($espacios->where('numero_espacio', '>=', 17) as $espacio)
+                        <div class="parking-space {{ $espacio->estado == 'ocupado' ? 'occupied' : ($espacio->estado == 'mantenimiento' ? 'maintenance' : 'available') }}">
+                             <!-- Imagen del auto según el estado -->
             <div class="car-image">
-                <img src="{{ $espacio->estado == 'ocupado' ? asset('images/car-red.png') : 
+                <img src="{{ $espacio->estado == 'ocupado' ? asset('images/card-red.jpeg') : 
                             ($espacio->estado == 'mantenimiento' ? asset('images/coche.png') : 
                             asset('images/coche2.png')) }}" 
                      alt="Espacio {{ $espacio->numero_espacio }}"
@@ -169,6 +207,14 @@
                                         <i class="fas fa-door-open"></i>
                                     </button>
                                 </form>
+                                @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
+                                    <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success" title="Gratis">
+                                            <i class="fas fa-gift"></i> Gratis
+                                        </button>
+                                    </form>
+                                @endif
                             @elseif($espacio->estado == 'libre')
                                 <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
                                     <i class="fas fa-user-plus"></i>
@@ -203,18 +249,57 @@
         <a href="{{ $espacios->nextPageUrl() }}" class="btn btn-primary ms-2">Siguiente Página</a>
     @endif
 </div>
+        </div>
     </div>
 </div>
 
 
 
 <style>
+    /* Estilos para la imagen de fondo */
+    .espacios-background {
+        padding: 20px 0;
+    }
+    
+    .espacios-card {
+        position: relative;
+        background-image: url('{{ asset('images/ESPACIOSA1.jpg') }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    
+    .espacios-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.75);
+        z-index: 1;
+    }
+    
+    .card-header {
+        position: relative;
+        z-index: 2;
+        background: rgba(248, 249, 250, 0.95);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-body {
+        position: relative;
+        z-index: 2;
+    }
+    
     .parking-layout {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: rgba(245, 247, 250, 0.85);
         padding: 30px;
         border-radius: 15px;
-        border: 3px solid #e0e0e0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 3px solid rgba(224, 224, 224, 0.8);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         max-width: 900px;
         margin: 0 auto;
     }
@@ -227,10 +312,11 @@
     }
     
     .parking-bottom-row {
-        margin-bottom: 0;
-        margin-top: 15px;
-    }
-    
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;              /* reduce la separación */
+    margin-top: 10px;
+}
     .parking-middle-section {
         display: grid;
         grid-template-columns: 1fr 2fr 1fr;
@@ -245,18 +331,21 @@
     }
     
     .parking-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        border: 3px dashed #fff;
-        position: relative;
-        overflow: hidden;
-    background-image: url('{{ asset('images/image.png') }}');
-    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    border: 3px dashed #fff;
+    position: relative;
+    overflow: hidden;
+    background-image: url('{{ asset('images/mapeo.jpeg') }}');
+    background-size: 120% 120%; /* 🔥 Solo agranda la imagen */
     background-position: center;
-    }
+    background-repeat: no-repeat;
+    min-height: 300px; /* 🔥 Altura fija independiente */
+    width: 500px; /* 🔥 Ancho fijo */
+}
     
     .parking-center::before {
         content: '';
@@ -315,34 +404,36 @@
     .parking-space {
         border: 3px solid #dee2e6;
         border-radius: 12px;
-        padding: 15px;
+        padding: 10px;
         text-align: center;
-        min-height: 160px;
+        min-height: 110px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         transition: all 0.3s ease;
         position: relative;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        background: rgba(255, 255, 255, 0.92);
     }
     
     .parking-space:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        background: rgba(255, 255, 255, 0.96);
     }
     
     .parking-space.available {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        background: linear-gradient(135deg, rgba(232, 245, 233, 0.9) 0%, rgba(200, 230, 201, 0.9) 100%);
         border-color: #4caf50;
     }
     
     .parking-space.occupied {
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        background: linear-gradient(135deg, rgba(255, 235, 238, 0.9) 0%, rgba(255, 205, 210, 0.9) 100%);
         border-color: #f44336;
     }
     
     .parking-space.maintenance {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
+        background: linear-gradient(135deg, rgba(255, 248, 225, 0.9) 0%, rgba(255, 224, 130, 0.9) 100%);
         border-color: #ff9800;
     }
     
@@ -497,6 +588,8 @@
         .parking-space {
             min-height: 140px;
         }
+        
+        
     }
     
     @media (max-width: 768px) {
@@ -522,6 +615,8 @@
         .entrance-text {
             font-size: 0.9rem;
         }
+        
+        
     }
     
     @media (max-width: 576px) {
@@ -563,7 +658,7 @@
     .parking-space::before {
         content: '';
         position: absolute;
-        top: -2px;
+        top: -2px;1
         left: -2px;
         right: -2px;
         bottom: -2px;

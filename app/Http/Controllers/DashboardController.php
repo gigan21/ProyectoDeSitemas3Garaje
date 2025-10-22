@@ -16,6 +16,8 @@ class DashboardController extends Controller
     {
         $totalEspacios = Espacio::count();
         $ocupados = Espacio::where('estado', 'ocupado')->count();
+        $mantenimiento = Espacio::where('estado', 'mantenimiento')->count();
+        $espaciosLlenos = $ocupados + $mantenimiento; // Espacios ocupados + mantenimiento
         $clientesMensuales = Cliente::where('tipo_cliente', 'mensual')->count();
         $clientesOcasionales = Cliente::where('tipo_cliente', 'ocasional')->count();
 
@@ -49,17 +51,23 @@ class DashboardController extends Controller
         
         // Datos para gráfico de ocupación por horas
         $ocupacionHoras = $this->getOcupacionPorHoras();
+        
+        // Datos para gráfico de ocupación por días de la semana
+        $ocupacionSemanal = $this->getOcupacionPorDiasSemana();
 
         return view('dashboard', compact(
             'totalEspacios',
             'ocupados',
+            'mantenimiento',
+            'espaciosLlenos',
             'clientesMensuales',
             'clientesOcasionales',
             'ingresosHoy',
             'ultimasEntradas',
             'busqueda',
             'ingresosSemana',
-            'ocupacionHoras'
+            'ocupacionHoras',
+            'ocupacionSemanal'
         ));
     }
 
@@ -109,6 +117,38 @@ class DashboardController extends Controller
                 ->count();
             
             $data[] = $ocupacion;
+        }
+        
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
+    }
+
+    private function getOcupacionPorDiasSemana()
+    {
+        $labels = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        $data = [];
+        
+        // Obtener datos de las últimas 4 semanas para cada día de la semana
+        for ($diaSemana = 1; $diaSemana <= 7; $diaSemana++) {
+            $ocupacionPromedio = 0;
+            $semanasConsideradas = 0;
+            
+            // Considerar las últimas 4 semanas
+            for ($semana = 0; $semana < 4; $semana++) {
+                $fecha = Carbon::now()->subWeeks($semana)->startOfWeek()->addDays($diaSemana - 1);
+                
+                // Contar espacios ocupados en mantenimiento en esa fecha
+                $ocupados = Espacio::where('estado', 'ocupado')->count();
+                $mantenimiento = Espacio::where('estado', 'mantenimiento')->count();
+                $totalOcupados = $ocupados + $mantenimiento;
+                
+                $ocupacionPromedio += $totalOcupados;
+                $semanasConsideradas++;
+            }
+            
+            $data[] = $semanasConsideradas > 0 ? round($ocupacionPromedio / $semanasConsideradas, 1) : 0;
         }
         
         return [

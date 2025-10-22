@@ -10,6 +10,7 @@ use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\SalidaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\CleanupController;
 
 // RUTA RAÍZ - Redirige según el estado de autenticación
 Route::get('/', function () {
@@ -58,10 +59,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/asignar/{id}', [EspacioController::class, 'asignar'])->name('espacios.asignar');
         Route::put('/{espacio}/asignar', [EspacioController::class, 'updateAsignacion'])->name('espacios.updateAsignacion');
         Route::post('/{espacio}/liberar', [EspacioController::class, 'liberar'])->name('espacios.liberar');
+        Route::post('/{espacio}/liberar-gratis', [EspacioController::class, 'liberarGratis'])->name('espacios.liberar-gratis');
     });
 
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::post('/reportes/generar', [ReporteController::class, 'generar'])->name('reportes.generar');
     Route::post('/reportes/espacios', [ReporteController::class, 'generarReporteEspacios'])->name('reportes.espacios');
+    
+    // Rutas de limpieza del sistema
+    Route::prefix('cleanup')->group(function () {
+        Route::get('/', [CleanupController::class, 'index'])->name('cleanup.index');
+        Route::post('/ocasional-clients', [CleanupController::class, 'cleanupOcasionalClients'])->name('cleanup.ocasional-clients');
+        Route::post('/ocasional-salidas', [CleanupController::class, 'cleanupOcasionalSalidas'])->name('cleanup.ocasional-salidas');
+        Route::post('/history', [CleanupController::class, 'cleanupHistory'])->name('cleanup.history');
+        Route::post('/system', [CleanupController::class, 'cleanupSystem'])->name('cleanup.system');
+    });
 
 });

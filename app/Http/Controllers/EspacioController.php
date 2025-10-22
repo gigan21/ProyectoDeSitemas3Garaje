@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Entrada;
 use App\Models\Salida;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EspacioController extends Controller
 {
@@ -15,7 +16,7 @@ class EspacioController extends Controller
 {
     $buscar = $request->input('buscar');
 
-    $espacios = Espacio::with('cliente')
+    $espacios = Espacio::with(['cliente', 'entradas.salida'])
         ->when($buscar, function($query, $buscar) {
             $query->where('numero_espacio', 'like', "%{$buscar}%")
                   ->orWhere('estado', 'like', "%{$buscar}%")
@@ -58,9 +59,15 @@ class EspacioController extends Controller
 
  // Formulario de edición
  public function edit(Espacio $espacio)
- {
-     return view('espacios.edit', compact('espacio'));
- }
+{
+    // Evitar edición si está ocupado
+    if ($espacio->estado === 'ocupado') {
+        return redirect()->route('espacios.index')
+            ->with('error', 'No puedes editar un espacio que está ocupado. Libéralo primero.');
+    }
+
+    return view('espacios.edit', compact('espacio'));
+}
 
  // Actualizar espacio
  public function update(Request $request, Espacio $espacio)
@@ -77,49 +84,145 @@ class EspacioController extends Controller
 
  // Eliminar espacio
  public function destroy(Espacio $espacio)
- {
-     $espacio->delete();
-     return redirect()->route('espacios.index')->with('success', 'Espacio eliminado correctamente.');
- }
-    public function asignar($id)
-    {
-        $espacio = Espacio::findOrFail($id);
-        $clientes = Cliente::all();
-        return view('espacios.asignar', compact('espacio', 'clientes'));
+{
+    // Verificar si el espacio está ocupado
+    if ($espacio->estado === 'ocupado') {
+        return redirect()->route('espacios.index')
+            ->with('error', 'No puedes eliminar un espacio que está ocupado. Libéralo antes de eliminarlo.');
     }
 
+    // Verificar si hay entradas activas relacionadas
+    $entradaActiva = Entrada::where('espacio_id', $espacio->id)
+        ->whereDoesntHave('salida')
+        ->first();
+
+    if ($entradaActiva) {
+        return redirect()->route('espacios.index')
+            ->with('error', 'No puedes eliminar este espacio mientras tenga una entrada activa.');
+    }
+
+    $espacio->delete();
+
+    return redirect()->route('espacios.index')
+        ->with('success', 'Espacio eliminado correctamente.');
+}
+
+ public function asignar($id)
+ {
+     $espacio = Espacio::findOrFail($id);
+ 
+     //  Solo traer clientes SIN espacio ocupado actualmente
+     $clientes = Cliente::whereDoesntHave('vehiculos.entradas', function ($query) {
+             $query->whereDoesntHave('salida'); // tiene entrada activa (aún no salió)
+         })
+         ->orderBy('id', 'desc')
+         ->get();
+ 
+     //  Si no hay clientes disponibles
+     if ($clientes->isEmpty()) {
+         return redirect()->route('espacios.index')
+             ->with('error', 'No hay clientes disponibles para asignar (todos tienen espacios ocupados).');
+     }
+ 
+     return view('espacios.asignar', compact('espacio', 'clientes'));
+ }
+ 
     public function updateAsignacion(Request $request, Espacio $espacio)
-    {
-        $request->validate([
-            'cliente_id' => 'nullable|exists:clientes,id'  
-        ]);
-    
+{
+    $request->validate([
+        'cliente_id' => 'nullable|exists:clientes,id'
+    ]);
+
+    DB::beginTransaction();
+    try {
+        //  DESASIGNAR CLIENTE
+        if (empty($request->cliente_id)) {
+            $entradaActiva = Entrada::where('espacio_id', $espacio->id)
+                ->whereDoesntHave('salida')
+                ->first();
+
+            if ($entradaActiva) {
+                DB::rollBack();
+                return back()->with('error', 'No puedes desasignar mientras exista una entrada activa. Libera el espacio primero.');
+            }
+
+            $espacio->update([
+                'cliente_id' => null,
+                'estado' => 'libre'
+            ]);
+
+            DB::commit();
+            return redirect()->route('espacios.index')->with('success', 'Espacio desasignado y marcado como libre.');
+        }
+
+        //  VALIDACIÓN NUEVA: verificar si el cliente ya tiene un espacio ocupado
+        $espacioOcupado = Espacio::where('cliente_id', $request->cliente_id)
+            ->where('estado', 'ocupado')
+            ->where('id', '!=', $espacio->id)
+            ->first();
+
+        if ($espacioOcupado) {
+            DB::rollBack();
+            return back()->with('error', 'Este cliente ya tiene un espacio asignado. Libera el anterior antes de asignar otro.');
+        }
+
+        //  Validar que el cliente tenga vehículo
+        $vehiculo = \App\Models\Vehiculo::where('cliente_id', $request->cliente_id)->first();
+        if (!$vehiculo) {
+            DB::rollBack();
+            return back()->with('error', 'El cliente seleccionado no tiene vehículo registrado. Registre un vehículo antes de asignar.');
+        }
+
+        //  Actualizar asignación
         $espacio->update([
             'cliente_id' => $request->cliente_id,
-            'estado' => $request->cliente_id ? 'ocupado' : 'libre'
+            'estado' => 'ocupado'
         ]);
-    
-        return redirect()->route('espacios.index')->with('success', 'Asignación actualizada');
+
+        //  Crear entrada si no existe
+        $entradaExistente = Entrada::where('espacio_id', $espacio->id)
+            ->whereDoesntHave('salida')
+            ->first();
+
+        if (!$entradaExistente) {
+            Entrada::create([
+                'vehiculo_id' => $vehiculo->id,
+                'espacio_id' => $espacio->id,
+                'fecha_entrada' => now(),
+            ]);
+        }
+
+        DB::commit();
+        return redirect()->route('espacios.index')->with('success', 'Asignación actualizada correctamente.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar asignación de espacio: ' . $e->getMessage());
+        return back()->with('error', 'No se pudo actualizar la asignación.');
     }
+}
+    
     public function liberar(Espacio $espacio)
 {
     try {
         DB::beginTransaction();
 
         // Buscar la entrada activa
-        $entrada = Entrada::where('espacio_id', $espacio->id)
-            ->whereDoesntHave('salida')
-            ->first();
+            $entrada = Entrada::where('espacio_id', $espacio->id)
+                ->whereDoesntHave('salida')
+                ->first();
 
-        if ($entrada) {
-            // Registrar salida con total_pagado = 0 para mensuales
+            if (!$entrada) {
+                DB::rollBack();
+                return back()->with('error', 'No hay entrada activa para este espacio.');
+            }
+
+            // Registrar salida (liberación estándar)
             Salida::create([
                 'entrada_id' => $entrada->id,
                 'fecha_salida' => now(),
                 'total_pagado' => 0,
-                 // Agrega este campo si existe
             ]);
-        }
 
         // Liberar el espacio
         $espacio->update([
@@ -129,8 +232,8 @@ class EspacioController extends Controller
 
         DB::commit();
 
-        return redirect()->route('espacios.index')
-            ->with('success', 'Espacio liberado exitosamente');
+            return redirect()->route('salidas.index')
+                ->with('success', 'Salida registrada y espacio liberado');
 
     } catch (\Exception $e) {
         DB::rollBack();
@@ -138,5 +241,50 @@ class EspacioController extends Controller
         return back()->with('error', 'Error al liberar el espacio');
     }
 }
+
+    public function liberarGratis(Espacio $espacio)
+    {
+        try {
+            DB::beginTransaction();
+
+            $entrada = Entrada::where('espacio_id', $espacio->id)
+                ->whereDoesntHave('salida')
+                ->with('vehiculo.cliente')
+                ->first();
+
+            if (!$entrada) {
+                DB::rollBack();
+                return back()->with('error', 'No hay entrada activa para este espacio.');
+            }
+
+            // Solo aplicar para clientes ocasionales
+            if (!$entrada->vehiculo || !$entrada->vehiculo->cliente || $entrada->vehiculo->cliente->tipo_cliente !== 'ocasional') {
+                DB::rollBack();
+                return back()->with('error', 'La opción Gratis solo aplica para clientes ocasionales.');
+            }
+
+            Salida::create([
+                'entrada_id' => $entrada->id,
+                'fecha_salida' => now(),
+                'total_pagado' => 0,
+                'es_gratis' => true,
+            ]);
+
+            $espacio->update([
+                'cliente_id' => null,
+                'estado' => 'libre'
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('salidas.index')
+                ->with('success', 'Salida Gratis registrada (ticket ≥100 Bs) y espacio liberado.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al liberar gratis el espacio: ' . $e->getMessage());
+            return back()->with('error', 'Error al liberar gratis el espacio');
+        }
+    }
     
 }

@@ -7,31 +7,38 @@
     background-color: #121212;
 }
 
-/* Mantener elementos de contenido claros */
-.dark-mode .card,
-.dark-mode .card-table,
+/* EXCLUIR EL DASHBOARD DEL MODO OSCURO */
+.dark-mode .dashboard-cards .card,
 .dark-mode .chart-container,
-.dark-mode .table-responsive,
 .dark-mode .recent-entries,
-.dark-mode .table {
+.dark-mode .admin-tools .card {
+    background-color: initial !important;
+    color: initial !important;
+}
+
+/* Resto de elementos SÍ aplican modo oscuro */
+.dark-mode .card:not(.dashboard-cards .card):not(.admin-tools .card),
+.dark-mode .card-table:not(.dashboard-cards .card),
+.dark-mode .table-responsive:not(.recent-entries .table-responsive),
+.dark-mode .table:not(.recent-entries .table) {
     background-color: white !important;
     color: #333 !important;
 }
 
-.dark-mode .table th {
+.dark-mode .table th:not(.recent-entries th) {
     background: #f8f9fa !important;
     color: #333 !important;
 }
 
-.dark-mode .table td {
+.dark-mode .table td:not(.recent-entries td) {
     border-bottom-color: #dee2e6 !important;
 }
 
-.dark-mode .table tr:hover td {
+.dark-mode .table tr:hover td:not(.recent-entries td) {
     background-color: #f8f9fa !important;
 }
 
-.dark-mode .card-header {
+.dark-mode .card-header:not(.admin-tools .card-header) {
     background-color: #f8f9fa !important;
     color: #333 !important;
     border-bottom: 1px solid #dee2e6 !important;
@@ -75,6 +82,7 @@
 .dark-mode .toggle-btn .fa-sun {
     display: block;
 }
+
 /* Cambiar color de texto en el nav-left cuando está en modo oscuro */
 .dark-mode .nav-left h1 {
     color: white !important;
@@ -97,4 +105,10 @@
 
 .dark-mode .clear-button {
     color: #aaa !important;
+}
+
+/* REMOVER la regla específica del dashboard */
+.dark-mode .chart-container h3,
+.dark-mode .recent-entries h3 {
+    color: initial !important;
 }
