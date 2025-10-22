@@ -75,4 +75,4 @@ Route::middleware('auth')->group(function () {
         Route::post('/system', [CleanupController::class, 'cleanupSystem'])->name('cleanup.system');
     });
 
-});
+});// Ruta simulada para septiembre

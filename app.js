@@ -1,0 +1,1 @@
+// Lógica simulada de septiembre
