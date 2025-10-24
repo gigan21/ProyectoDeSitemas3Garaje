@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+ <!-- FORZAR HTTPS PARA RECURSOS INSEGUROS -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <div class="login-wrapper">
     <!-- Sección izquierda con imagen y mensaje de bienvenida -->
     <div class="login-left">
