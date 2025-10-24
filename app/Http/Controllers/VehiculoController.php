@@ -45,7 +45,7 @@ public function store(Request $request)
         'placa' => [
             'required',
             'string',
-            // 🔥 AGREGADO: Validación según tipo de placa
+            //  AGREGADO: Validación según tipo de placa
             function ($attribute, $value, $fail) use ($request) {
                 $placa = strtoupper($value);
                 

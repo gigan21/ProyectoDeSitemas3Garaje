@@ -47,12 +47,9 @@
                                         </button>
                                     </form>
                                     @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
-                                        <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" title="Gratis">
-                                                <i class="fas fa-gift"></i> Gratis
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-success" title="Aplicar descuento gratis escaneando código QR" data-espacio-id="{{ $espacio->id }}" onclick="openQRScanner({{ $espacio->id }})">
+                                            <i class="fas fa-gift"></i> Gratis
+                                        </button>
                                     @endif
                                 @elseif($espacio->estado == 'libre')
                                     <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
@@ -95,12 +92,9 @@
                                             </button>
                                         </form>
                                         @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
-                                            <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success" title="Gratis">
-                                                    <i class="fas fa-gift"></i> Gratis
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-success" title="Aplicar descuento gratis escaneando código QR" data-espacio-id="{{ $espacio->id }}" onclick="openQRScanner({{ $espacio->id }})">
+                                                <i class="fas fa-gift"></i> Gratis
+                                            </button>
                                         @endif
                                     @elseif($espacio->estado == 'libre')
                                         <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
@@ -152,12 +146,9 @@
                                             </button>
                                         </form>
                                         @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
-                                            <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success" title="Gratis">
-                                                    <i class="fas fa-gift"></i> Gratis
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-success" title="Aplicar descuento gratis escaneando código QR" data-espacio-id="{{ $espacio->id }}" onclick="openQRScanner({{ $espacio->id }})">
+                                                <i class="fas fa-gift"></i> Gratis
+                                            </button>
                                         @endif
                                     @elseif($espacio->estado == 'libre')
                                         <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
@@ -208,12 +199,9 @@
                                     </button>
                                 </form>
                                 @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
-                                    <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-success" title="Gratis">
-                                            <i class="fas fa-gift"></i> Gratis
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-success" title="Aplicar descuento gratis escaneando código QR" data-espacio-id="{{ $espacio->id }}" onclick="openQRScanner({{ $espacio->id }})">
+                                        <i class="fas fa-gift"></i> Gratis
+                                    </button>
                                 @endif
                             @elseif($espacio->estado == 'libre')
                                 <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">
@@ -761,4 +749,174 @@
 
 
 </style>
+<!-- Modal para escáner QR -->
+<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">
+                    <i class="fas fa-qrcode"></i> Escanear Código QR
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <p class="text-muted">Posiciona el código QR frente a la cámara</p>
+                </div>
+                
+                <!-- Contenedor de la cámara -->
+                <div class="camera-container text-center">
+                    <video id="qrVideo" width="400" height="300" autoplay muted style="display: none; border-radius: 8px;" aria-label="Cámara para escaneo de códigos QR"></video>
+                    <canvas id="qrCanvas" width="400" height="300" style="display: none;" tabindex="-1" aria-hidden="true"></canvas>
+                    <div id="cameraPlaceholder" class="camera-placeholder">
+                        <i class="fas fa-camera fa-3x text-muted"></i>
+                        <p class="mt-2 text-muted">Iniciando cámara...</p>
+                    </div>
+                </div>
+                
+                <!-- Resultado del escaneo -->
+                <div id="scanResult" class="mt-3" style="display: none;">
+                    <div class="alert" id="resultAlert">
+                        <div class="d-flex align-items-center">
+                            <i id="resultIcon" class="fas fa-2x me-3"></i>
+                            <div>
+                                <h6 id="resultTitle" class="mb-1"></h6>
+                                <p id="resultMessage" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información del ticket -->
+                <div id="ticketInfo" class="mt-3" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-ticket-alt"></i> Información del Ticket
+                            </h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Ticket:</strong> <span id="ticketNumber"></span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Monto:</strong> <span id="ticketAmount"></span> Bs
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" id="retryScanBtn" class="btn btn-warning" style="display: none;">
+                    <i class="fas fa-redo"></i> Reintentar
+                </button>
+                <button type="button" id="processTicketBtn" class="btn btn-success" style="display: none;">
+                    <i class="fas fa-check"></i> Procesar Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos CSS para el modal -->
+<style>
+.camera-container {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-placeholder {
+    text-align: center;
+    color: #6c757d;
+}
+
+#qrVideo {
+    max-width: 100%;
+    height: auto;
+}
+
+#qrCanvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.scan-success {
+    background-color: #d1edff;
+    border-color: #0dcaf0;
+    color: #055160;
+}
+
+.scan-error {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.scan-warning {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #664d03;
+}
+</style>
+
+<!-- Incluir jsQR library -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<!-- Script simplificado para entorno controlado -->
+<script src="{{ asset('js/qr-scanner-simple.js') }}"></script>
+
+<script>
+// Verificar que todo esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página cargada');
+    console.log('jsQR disponible:', typeof jsQR !== 'undefined');
+    console.log('Scanner disponible:', typeof window.qrScanner !== 'undefined');
+    console.log('Función openQRScanner:', typeof openQRScanner !== 'undefined');
+    
+    // Verificar que el modal existe
+    const modal = document.getElementById('qrScannerModal');
+    console.log('Modal existe:', !!modal);
+    
+    if (modal) {
+        console.log('Modal encontrado correctamente');
+    } else {
+        console.error('Modal no encontrado!');
+    }
+    
+    // Asegurar que todos los botones Gratis usen el nuevo comportamiento
+    const botonesGratis = document.querySelectorAll('button[title*="descuento gratis"]');
+    console.log('Botones Gratis encontrados:', botonesGratis.length);
+    
+    botonesGratis.forEach((boton, index) => {
+        console.log(`Botón ${index + 1}:`, boton);
+        
+        // Remover cualquier event listener anterior
+        boton.onclick = null;
+        
+        // Agregar el nuevo comportamiento
+        boton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const espacioId = this.getAttribute('data-espacio-id');
+            console.log('Botón Gratis clickeado para espacio:', espacioId);
+            
+            if (typeof openQRScanner === 'function') {
+                openQRScanner(espacioId);
+            } else {
+                console.error('Función openQRScanner no disponible');
+            }
+        });
+    });
+});
+</script>
+
 @endsection

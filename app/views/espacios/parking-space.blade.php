@@ -25,12 +25,9 @@
                 </button>
             </form>
             @if($espacio->cliente && $espacio->cliente->tipo_cliente === 'ocasional')
-                <form action="{{ route('espacios.liberar-gratis', $espacio->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Aplicar descuento Gratis por ticket ≥ 100 Bs?');">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-success" title="Gratis (ticket ≥100 Bs)">
-                        <i class="fas fa-badge-dollar"></i> Gratis
-                    </button>
-                </form>
+                <button type="button" class="btn btn-sm btn-success" title="Aplicar descuento gratis escaneando código QR" data-espacio-id="{{ $espacio->id }}" onclick="openQRScanner({{ $espacio->id }})">
+                    <i class="fas fa-badge-dollar"></i> Gratis
+                </button>
             @endif
         @elseif($espacio->estado == 'libre')
             <a href="{{ route('espacios.asignar', $espacio->id) }}" class="btn btn-sm btn-info" title="Asignar">

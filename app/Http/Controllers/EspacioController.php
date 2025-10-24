@@ -286,5 +286,82 @@ class EspacioController extends Controller
             return back()->with('error', 'Error al liberar gratis el espacio');
         }
     }
+
+    public function procesarQR(Request $request, Espacio $espacio)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Validar datos del request
+            $request->validate([
+                'ticket' => 'required|string',
+                'monto' => 'required|numeric|min:0'
+            ]);
+
+            $ticket = $request->input('ticket');
+            $monto = $request->input('monto');
+
+            // Buscar la entrada activa
+            $entrada = Entrada::where('espacio_id', $espacio->id)
+                ->whereDoesntHave('salida')
+                ->with('vehiculo.cliente')
+                ->first();
+
+            if (!$entrada) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay entrada activa para este espacio.'
+                ], 400);
+            }
+
+            // Solo aplicar para clientes ocasionales
+            if (!$entrada->vehiculo || !$entrada->vehiculo->cliente || $entrada->vehiculo->cliente->tipo_cliente !== 'ocasional') {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La opción Gratis solo aplica para clientes ocasionales.'
+                ], 400);
+            }
+
+            // Verificar si el monto es suficiente para aplicar descuento
+            if ($monto < 100) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => "Descuento no aplicable. Monto insuficiente ({$monto} Bs < 100 Bs)."
+                ], 400);
+            }
+
+            // Crear salida con descuento aplicado
+            Salida::create([
+                'entrada_id' => $entrada->id,
+                'fecha_salida' => now(),
+                'total_pagado' => 0,
+                'es_gratis' => true,
+            ]);
+
+            // Liberar el espacio
+            $espacio->update([
+                'cliente_id' => null,
+                'estado' => 'libre'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Descuento aplicado exitosamente. Ticket {$ticket} ({$monto} Bs) procesado. Espacio liberado."
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al procesar QR: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno al procesar el ticket.'
+            ], 500);
+        }
+    }
     
 }

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos QR - GarajeAlfaro</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .qr-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .qr-section h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .json-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .success {
+            border-color: #4caf50;
+            background-color: #f1f8e9;
+        }
+        .warning {
+            border-color: #ff9800;
+            background-color: #fff3e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Generador de Códigos QR para GarajeAlfaro</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instrucciones de Uso:</h3>
+            <ol>
+                <li>Los códigos QR se generan automáticamente al cargar esta página</li>
+                <li><strong>Ticket 1 (120 Bs)</strong> - Aplica descuento gratuito</li>
+                <li><strong>Ticket 2 (99 Bs)</strong> - No aplica descuento</li>
+                <li>Usa estos códigos QR para probar el escáner en el sistema</li>
+            </ol>
+        </div>
+
+        <!-- Ticket 1 - Descuento Aplicable -->
+        <div class="qr-section success">
+            <h3>✅ Ticket 1 - Descuento Aplicable (120 Bs)</h3>
+            <div class="json-data">
+                {"ticket": "TK001", "monto": 120}
+            </div>
+            <div class="qr-code">
+                <canvas id="qr1"></canvas>
+            </div>
+            <p><strong>Resultado esperado:</strong> Descuento aplicado, espacio liberado como gratis</p>
+        </div>
+
+        <!-- Ticket 2 - Descuento No Aplicable -->
+        <div class="qr-section warning">
+            <h3>❌ Ticket 2 - Descuento No Aplicable (99 Bs)</h3>
+            <div class="json-data">
+                {"ticket": "TK002", "monto": 99}
+            </div>
+            <div class="qr-code">
+                <canvas id="qr2"></canvas>
+            </div>
+            <p><strong>Resultado esperado:</strong> Descuento no aplicable, monto insuficiente</p>
+        </div>
+
+        <div class="instructions">
+            <h3>🔧 Cómo probar en el sistema:</h3>
+            <ol>
+                <li>Ve al módulo de <strong>Espacios</strong> en GarajeAlfaro</li>
+                <li>Asegúrate de tener un espacio ocupado por un <strong>cliente ocasional</strong></li>
+                <li>Haz clic en el botón <strong>"Gratis"</strong> de ese espacio</li>
+                <li>Permite el acceso a la cámara</li>
+                <li>Escanea el código QR correspondiente</li>
+                <li>Observa el resultado en el modal</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Generar QR para Ticket 1 (120 Bs)
+        QRCode.toCanvas(document.getElementById('qr1'), '{"ticket": "TK001", "monto": 120}', {
+            width: 200,
+            height: 200,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) console.error('Error generando QR1:', error);
+        });
+
+        // Generar QR para Ticket 2 (99 Bs)
+        QRCode.toCanvas(document.getElementById('qr2'), '{"ticket": "TK002", "monto": 99}', {
+            width: 200,
+            height: 200,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        }, function (error) {
+            if (error) console.error('Error generando QR2:', error);
+        });
+    </script>
+</body>
+</html>

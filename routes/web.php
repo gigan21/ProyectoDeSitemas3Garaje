@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{espacio}/asignar', [EspacioController::class, 'updateAsignacion'])->name('espacios.updateAsignacion');
         Route::post('/{espacio}/liberar', [EspacioController::class, 'liberar'])->name('espacios.liberar');
         Route::post('/{espacio}/liberar-gratis', [EspacioController::class, 'liberarGratis'])->name('espacios.liberar-gratis');
+        Route::post('/{espacio}/procesar-qr', [EspacioController::class, 'procesarQR'])->name('espacios.procesar-qr');
     });
 
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
